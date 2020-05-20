@@ -14,7 +14,7 @@ class CartItem {
   });
 }
 
-class Cart with ChangeNotifier {
+class CartsProvider with ChangeNotifier {
   Map<String, CartItem> _items;
 
   Map<String, CartItem> get items {

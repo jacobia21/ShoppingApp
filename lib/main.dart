@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'screens/products_overview_screen.dart';
 import 'screens/product_detail_screen.dart';
 import 'providers/products_provider.dart';
+import 'providers/carts_provider.dart';
 
 void main() {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -19,8 +20,15 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (ctx) => ProductsProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ProductsProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => CartsProvider(),
+        ),
+      ],
       child: MaterialApp(
         home: ProductsOverviewScreen(),
         title: 'Shopping App',
