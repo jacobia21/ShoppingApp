@@ -9,6 +9,7 @@ import 'screens/product_detail_screen.dart';
 import 'providers/products_provider.dart';
 import 'providers/carts_provider.dart';
 import './screens/cart_screen.dart';
+import './providers/orders_provider.dart';
 
 void main() {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -29,6 +30,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => CartsProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => OrdersProvider(),
+        )
       ],
       child: MaterialApp(
         home: ProductsOverviewScreen(),
