@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import './product_provider.dart';
 
 class ProductsProvider with ChangeNotifier {
@@ -47,16 +50,33 @@ class ProductsProvider with ChangeNotifier {
     return _items.firstWhere((product) => product.id == id);
   }
 
-  void addProduct(ProductProvider product) {
-    final newProduct = ProductProvider(
-      id: DateTime.now().toString(),
-      title: product.title,
-      imageUrl: product.imageUrl,
-      description: product.description,
-      price: product.price,
-    );
-    _items.add(newProduct);
-    notifyListeners();
+  Future<void> addProduct(ProductProvider product) {
+    const url = 'https://shopping-app-jacobia.firebaseio.com/products.json';
+    return http
+        .post(
+      url,
+      body: json.encode(
+        {
+          'title': product.title,
+          'description': product.description,
+          'imageUrl': product.imageUrl,
+          'price': product.price,
+          'isFavorite': product.isFavorite,
+        },
+      ),
+    )
+        .then((response) {
+      print(json.decode(response.body));
+      final newProduct = ProductProvider(
+        id: json.decode(response.body)['name'],
+        title: product.title,
+        imageUrl: product.imageUrl,
+        description: product.description,
+        price: product.price,
+      );
+      _items.add(newProduct);
+      notifyListeners();
+    });
   }
 
   void updateProduct(String id, ProductProvider newProduct) {
