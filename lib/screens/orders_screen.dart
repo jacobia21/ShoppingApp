@@ -4,36 +4,42 @@ import '../providers/orders_provider.dart' show OrdersProvider;
 import '../widgets/order_item.dart';
 import '../widgets/app_drawer.dart';
 
-class OrdersScreen extends StatefulWidget {
+class OrdersScreen extends StatelessWidget {
   static const routeName = '/orders';
 
   @override
-  _OrdersScreenState createState() => _OrdersScreenState();
-}
-
-class _OrdersScreenState extends State<OrdersScreen> {
-  @override
-  initState() {
-    Future.delayed(Duration.zero).then((_) {
-      Provider.of<OrdersProvider>(context, listen: false).fetchOrders();
-    });
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final orderData = Provider.of<OrdersProvider>(context);
+    print('building orders');
+    //final orderData = Provider.of<OrdersProvider>(context);
     return Scaffold(
-      drawer: AppDrawer(),
-      appBar: AppBar(
-        title: Text('Your Orders'),
-      ),
-      body: ListView.builder(
-        itemCount: orderData.orders.length,
-        itemBuilder: (ctx, index) {
-          return OrderItem(orderData.orders[index]);
-        },
-      ),
-    );
+        drawer: AppDrawer(),
+        appBar: AppBar(
+          title: Text('Your Orders'),
+        ),
+        body: FutureBuilder(
+          future: Provider.of<OrdersProvider>(context, listen: false).fetchOrders(),
+          builder: (context, dataSnapshot) {
+            if (dataSnapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                  child: CircularProgressIndicator(
+                backgroundColor: Theme.of(context).primaryColor,
+              ));
+            }
+            if (dataSnapshot.error != null) {
+              return Center(
+                child: Text('An error occured'),
+              );
+            } else {
+              return Consumer<OrdersProvider>(
+                builder: (ctx, orderData, child) => ListView.builder(
+                  itemCount: orderData.orders.length,
+                  itemBuilder: (ctx, index) {
+                    return OrderItem(orderData.orders[index]);
+                  },
+                ),
+              );
+            }
+          },
+        ));
   }
 }
