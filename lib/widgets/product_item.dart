@@ -8,6 +8,7 @@ import '../providers/carts_provider.dart';
 class ProductItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final scaffold = Scaffold.of(context);
     final product = Provider.of<ProductProvider>(context, listen: false);
     final cart = Provider.of<CartsProvider>(context, listen: false);
     return ClipRRect(
@@ -33,7 +34,17 @@ class ProductItem extends StatelessWidget {
               icon: Icon(
                 product.isFavorite ? Icons.favorite : Icons.favorite_border,
               ),
-              onPressed: () => product.toggleFavoriteStatus(),
+              onPressed: () async {
+                try {
+                  await product.toggleFavoriteStatus();
+                } catch (error) {
+                  scaffold.showSnackBar(SnackBar(
+                    content: Text(
+                      error.toString(),
+                    ),
+                  ));
+                }
+              },
             ),
           ),
           title: Text(

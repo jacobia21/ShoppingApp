@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:ShoppingApp/models/http_exceptions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 class ProductProvider with ChangeNotifier {
   final String id;
@@ -17,8 +21,21 @@ class ProductProvider with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  void toggleFavoriteStatus() {
+  Future<void> toggleFavoriteStatus() async {
+    final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json';
+    var originalFavoriteStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
+    final response = await http.patch(
+      url,
+      body: json.encode({
+        'isFavorite': isFavorite,
+      }),
+    );
+    if (response.statusCode >= 400) {
+      isFavorite = originalFavoriteStatus;
+      notifyListeners();
+      throw HttpException('Could not update Favorite status');
+    }
   }
 }
