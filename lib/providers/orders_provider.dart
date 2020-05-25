@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ShoppingApp/widgets/order_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
@@ -51,5 +52,13 @@ class OrdersProvider with ChangeNotifier {
       ),
     );
     notifyListeners();
+  }
+
+  Future<void> fetchOrders() async {
+    final url = 'https://shopping-app-jacobia.firebaseio.com/orders.json';
+    final response = await http.get(url);
+    final List<OrderItem> _loadedOrders = [];
+    final extractedData = json.decode(response.body) as Map<String, dynamic>;
+    extractedData.forEach((orderId, orderData) {});
   }
 }
