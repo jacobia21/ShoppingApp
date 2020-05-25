@@ -38,11 +38,14 @@ class ProductItem extends StatelessWidget {
                 try {
                   await product.toggleFavoriteStatus();
                 } catch (error) {
-                  scaffold.showSnackBar(SnackBar(
-                    content: Text(
-                      error.toString(),
+                  scaffold.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        error.toString(),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                  ));
+                  );
                 }
               },
             ),
