@@ -21,6 +21,7 @@ class Order {
 class OrdersProvider with ChangeNotifier {
   List<Order> _orders = [];
   String authToken;
+  String userId;
 
   // OrdersProvider(this.authToken, this._orders);
 
@@ -29,7 +30,7 @@ class OrdersProvider with ChangeNotifier {
   }
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
-    final url = 'https://shopping-app-jacobia.firebaseio.com/orders.json?auth=$authToken';
+    final url = 'https://shopping-app-jacobia.firebaseio.com/orders/$userId.json?auth=$authToken';
     final dateTime = DateTime.now();
     final response = await http.post(url,
         body: json.encode({
@@ -58,7 +59,7 @@ class OrdersProvider with ChangeNotifier {
   }
 
   Future<void> fetchOrders() async {
-    final url = 'https://shopping-app-jacobia.firebaseio.com/orders.json?auth=$authToken';
+    final url = 'https://shopping-app-jacobia.firebaseio.com/orders/$userId.json?auth=$authToken';
     final response = await http.get(url);
     final List<Order> _loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -84,6 +85,7 @@ class OrdersProvider with ChangeNotifier {
 
   void update(AuthProvider authData) {
     authToken = authData.token;
+    userId = authData.userID;
     notifyListeners();
   }
 }
