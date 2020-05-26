@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -8,6 +9,7 @@ class AuthProvider with ChangeNotifier {
   String _token;
   DateTime _expirationDate;
   String _userId;
+  Timer _authTimer;
 
   bool get isAuth {
     return token != null;
@@ -50,6 +52,7 @@ class AuthProvider with ChangeNotifier {
           ),
         ),
       );
+      _autoLogout();
       notifyListeners();
     } catch (error) {
       throw error;
@@ -68,6 +71,15 @@ class AuthProvider with ChangeNotifier {
     _token = null;
     _userId = null;
     _expirationDate = null;
+    if (_authTimer != null) _authTimer.cancel();
     notifyListeners();
+  }
+
+  void _autoLogout() {
+    if (_authTimer != null) {
+      _authTimer.cancel();
+    }
+    final timeToExpiration = _expirationDate.difference(DateTime.now()).inSeconds;
+    _authTimer = Timer(Duration(seconds: timeToExpiration), logout);
   }
 }
