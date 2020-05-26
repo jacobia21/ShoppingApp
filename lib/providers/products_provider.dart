@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import './product_provider.dart';
 import '../models/http_exceptions.dart';
+import '../providers/auth_provider.dart';
 
 class ProductsProvider with ChangeNotifier {
   List<ProductProvider> _items = [
@@ -39,8 +40,8 @@ class ProductsProvider with ChangeNotifier {
     // ),
   ];
 
-  final String authToken;
-  ProductsProvider(this.authToken, this._items);
+  String authToken;
+  // ProductsProvider(this.authToken, this._items);
 
   List<ProductProvider> get items {
     return [..._items];
@@ -87,6 +88,7 @@ class ProductsProvider with ChangeNotifier {
 
   Future<void> fetchProducts() async {
     final url = 'https://shopping-app-jacobia.firebaseio.com/products.json?auth=$authToken';
+    print(url);
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -144,5 +146,10 @@ class ProductsProvider with ChangeNotifier {
       throw HttpException('Could not delete product.');
     }
     existingProduct = null;
+  }
+
+  void update(AuthProvider authData) {
+    authToken = authData.token;
+    notifyListeners();
   }
 }

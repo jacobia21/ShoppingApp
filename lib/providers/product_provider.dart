@@ -21,8 +21,8 @@ class ProductProvider with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavoriteStatus() async {
-    final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json';
+  Future<void> toggleFavoriteStatus(String authToken) async {
+    final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json?auth=$authToken';
     var originalFavoriteStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();

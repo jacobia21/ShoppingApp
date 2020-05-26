@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../providers/carts_provider.dart';
+import '../providers/auth_provider.dart';
 
 class Order {
   final String id;
@@ -19,13 +20,16 @@ class Order {
 
 class OrdersProvider with ChangeNotifier {
   List<Order> _orders = [];
+  String authToken;
+
+  // OrdersProvider(this.authToken, this._orders);
 
   List<Order> get orders {
     return [..._orders];
   }
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
-    final url = 'https://shopping-app-jacobia.firebaseio.com/orders.json';
+    final url = 'https://shopping-app-jacobia.firebaseio.com/orders.json?auth=$authToken';
     final dateTime = DateTime.now();
     final response = await http.post(url,
         body: json.encode({
@@ -54,7 +58,7 @@ class OrdersProvider with ChangeNotifier {
   }
 
   Future<void> fetchOrders() async {
-    final url = 'https://shopping-app-jacobia.firebaseio.com/orders.json';
+    final url = 'https://shopping-app-jacobia.firebaseio.com/orders.json?auth=$authToken';
     final response = await http.get(url);
     final List<Order> _loadedOrders = [];
     final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -75,6 +79,11 @@ class OrdersProvider with ChangeNotifier {
     });
 
     _orders = _loadedOrders.reversed.toList();
+    notifyListeners();
+  }
+
+  void update(AuthProvider authData) {
+    authToken = authData.token;
     notifyListeners();
   }
 }

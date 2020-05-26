@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../screens/product_detail_screen.dart';
 import '../providers/product_provider.dart';
 import '../providers/carts_provider.dart';
+import '../providers/auth_provider.dart';
 
 class ProductItem extends StatelessWidget {
   @override
@@ -11,6 +12,7 @@ class ProductItem extends StatelessWidget {
     final scaffold = Scaffold.of(context);
     final product = Provider.of<ProductProvider>(context, listen: false);
     final cart = Provider.of<CartsProvider>(context, listen: false);
+    final authData = Provider.of<AuthProvider>(context, listen: false);
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: GridTile(
@@ -36,7 +38,7 @@ class ProductItem extends StatelessWidget {
               ),
               onPressed: () async {
                 try {
-                  await product.toggleFavoriteStatus();
+                  await product.toggleFavoriteStatus(authData.token);
                 } catch (error) {
                   scaffold.showSnackBar(
                     SnackBar(
