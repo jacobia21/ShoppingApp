@@ -21,16 +21,17 @@ class ProductProvider with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavoriteStatus(String authToken) async {
-    final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json?auth=$authToken';
+  Future<void> toggleFavoriteStatus(String authToken, String userID) async {
+    final url =
+        'https://shopping-app-jacobia.firebaseio.com/userFavorites/$userID/$id.json?auth=$authToken';
     var originalFavoriteStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
-    final response = await http.patch(
+    final response = await http.put(
       url,
-      body: json.encode({
-        'isFavorite': isFavorite,
-      }),
+      body: json.encode(
+        isFavorite,
+      ),
     );
     if (response.statusCode >= 400) {
       isFavorite = originalFavoriteStatus;

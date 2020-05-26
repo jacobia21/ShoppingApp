@@ -41,6 +41,7 @@ class ProductsProvider with ChangeNotifier {
   ];
 
   String authToken;
+  String userID;
   // ProductsProvider(this.authToken, this._items);
 
   List<ProductProvider> get items {
@@ -66,11 +67,11 @@ class ProductsProvider with ChangeNotifier {
             'description': product.description,
             'imageUrl': product.imageUrl,
             'price': product.price,
-            'isFavorite': product.isFavorite,
+            'creatorId': userID,
           },
         ),
       );
-      print(json.decode(response.body));
+
       final newProduct = ProductProvider(
         id: json.decode(response.body)['name'],
         title: product.title,
@@ -81,19 +82,24 @@ class ProductsProvider with ChangeNotifier {
       _items.add(newProduct);
       notifyListeners();
     } catch (error) {
-      print(error);
       throw error;
     }
   }
 
-  Future<void> fetchProducts() async {
-    final url = 'https://shopping-app-jacobia.firebaseio.com/products.json?auth=$authToken';
-    print(url);
+  Future<void> fetchProducts([bool filterByUser = false]) async {
+    final filterString = filterByUser ? 'orderBy="creatorId"&equalTo="$userID"' : '';
+    var url =
+        'https://shopping-app-jacobia.firebaseio.com/products.json?auth=$authToken&$filterString';
+
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
       final List<ProductProvider> loadedProducts = [];
       if (extractedData == null) return;
+      url =
+          'https://shopping-app-jacobia.firebaseio.com/userFavorites/$userID.json?auth=$authToken';
+      final favoriteResponse = await http.get(url);
+      final favoriteData = json.decode(favoriteResponse.body);
       extractedData.forEach((prodId, prodData) {
         loadedProducts.add(
           ProductProvider(
@@ -101,7 +107,7 @@ class ProductsProvider with ChangeNotifier {
             title: prodData['title'],
             description: prodData['description'],
             price: prodData['price'],
-            isFavorite: prodData['isFavorite'],
+            isFavorite: favoriteData == null ? false : favoriteData[prodId] ?? false,
             imageUrl: prodData['imageUrl'],
           ),
         );
@@ -117,14 +123,14 @@ class ProductsProvider with ChangeNotifier {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
       final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json?auth=$authToken';
-      final response = await http.patch(url,
+      await http.patch(url,
           body: json.encode({
             'title': newProduct.title,
             'description': newProduct.description,
             'imageUrl': newProduct.imageUrl,
             'price': newProduct.price,
           }));
-      print(response.body);
+
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
@@ -150,6 +156,7 @@ class ProductsProvider with ChangeNotifier {
 
   void update(AuthProvider authData) {
     authToken = authData.token;
+    userID = authData.userID;
     notifyListeners();
   }
 }

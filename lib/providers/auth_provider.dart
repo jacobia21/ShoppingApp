@@ -21,6 +21,10 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  String get userID {
+    return _userId;
+  }
+
   Future<void> _authenticate(String email, String password, String urlSegment) async {
     try {
       final url =
