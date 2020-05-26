@@ -39,6 +39,9 @@ class ProductsProvider with ChangeNotifier {
     // ),
   ];
 
+  final String authToken;
+  ProductsProvider(this.authToken, this._items);
+
   List<ProductProvider> get items {
     return [..._items];
   }
@@ -52,7 +55,7 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> addProduct(ProductProvider product) async {
-    const url = 'https://shopping-app-jacobia.firebaseio.com/products.json';
+    final url = 'https://shopping-app-jacobia.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.post(
         url,
@@ -83,7 +86,7 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> fetchProducts() async {
-    const url = 'https://shopping-app-jacobia.firebaseio.com/products.json';
+    final url = 'https://shopping-app-jacobia.firebaseio.com/products.json?auth=$authToken';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
@@ -111,14 +114,15 @@ class ProductsProvider with ChangeNotifier {
   Future<void> updateProduct(String id, ProductProvider newProduct) async {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
-      final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json';
-      await http.patch(url,
+      final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json?auth=$authToken';
+      final response = await http.patch(url,
           body: json.encode({
             'title': newProduct.title,
             'description': newProduct.description,
             'imageUrl': newProduct.imageUrl,
             'price': newProduct.price,
           }));
+      print(response.body);
       _items[prodIndex] = newProduct;
       notifyListeners();
     } else {
@@ -127,7 +131,7 @@ class ProductsProvider with ChangeNotifier {
   }
 
   Future<void> deleteProduct(String id) async {
-    final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json';
+    final url = 'https://shopping-app-jacobia.firebaseio.com/products/$id.json?auth=$authToken';
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
     var existingProduct = _items[existingProductIndex];
     _items.removeAt(existingProductIndex);
