@@ -3,7 +3,10 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/http_exceptions.dart';
+import '../globals.dart' as globals;
 
 class AuthProvider with ChangeNotifier {
   String _token;
@@ -30,7 +33,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> _authenticate(String email, String password, String urlSegment) async {
     try {
       final url =
-          'https://identitytoolkit.googleapis.com/v1/accounts:$urlSegment?key=AIzaSyCBeN16z5Dtv5mNdYbZSv7h2ItwwzvnPic';
+          'https://identitytoolkit.googleapis.com/v1/accounts:$urlSegment?key=${globals.key}';
       final response = await http.post(
         url,
         body: json.encode({
@@ -54,6 +57,15 @@ class AuthProvider with ChangeNotifier {
       );
       _autoLogout();
       notifyListeners();
+      final preferences = await SharedPreferences.getInstance();
+      final userData = json.encode(
+        {
+          'token': _token,
+          'userId': _userId,
+          'expirationDate': _expirationDate.toIso8601String(),
+        },
+      );
+      preferences.setString('userData', userData);
     } catch (error) {
       throw error;
     }
@@ -65,6 +77,28 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> login(String email, String password) async {
     return _authenticate(email, password, 'signInWithPassword');
+  }
+
+  Future<bool> tryAutoLogin() async {
+    final preferences = await SharedPreferences.getInstance();
+    if (!preferences.containsKey('userData')) {
+      print('returning false');
+      return false;
+    }
+    final extractedUserData =
+        json.decode(preferences.getString('userData')) as Map<String, dynamic>;
+    final expirationDate = extractedUserData['expirationDate'];
+    if (expirationDate.isAfter(DateTime.now())) {
+      print('returning false 1');
+      return false;
+    }
+    _token = extractedUserData['token'];
+    _userId = extractedUserData['userId'];
+    _expirationDate = extractedUserData['expirationDate'];
+    notifyListeners();
+    _autoLogout();
+    print('returning true');
+    return true;
   }
 
   void logout() {

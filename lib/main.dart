@@ -15,6 +15,7 @@ import './screens/orders_screen.dart';
 import './screens/user_products_screen.dart';
 import './screens/edit_product_screen.dart';
 import './screens/auth-screen.dart';
+import './screens/splash-screen.dart';
 
 void main() {
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -46,7 +47,15 @@ class MyApp extends StatelessWidget {
       ],
       child: Consumer<AuthProvider>(
         builder: (ctx, auth, _) => MaterialApp(
-          home: auth.isAuth ? ProductsOverviewScreen() : AuthScreen(),
+          home: auth.isAuth
+              ? ProductsOverviewScreen()
+              : FutureBuilder(
+                  future: auth.tryAutoLogin(),
+                  builder: (ctx, authResultSnapshot) =>
+                      authResultSnapshot.connectionState == ConnectionState.waiting
+                          ? SplashScreen()
+                          : AuthScreen(),
+                ),
           title: 'Shopping App',
           theme: ThemeData(
             primarySwatch: Colors.green,
