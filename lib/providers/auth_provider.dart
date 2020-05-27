@@ -82,14 +82,12 @@ class AuthProvider with ChangeNotifier {
   Future<bool> tryAutoLogin() async {
     final preferences = await SharedPreferences.getInstance();
     if (!preferences.containsKey('userData')) {
-      print('returning false');
       return false;
     }
     final extractedUserData =
         json.decode(preferences.getString('userData')) as Map<String, dynamic>;
     final expirationDate = DateTime.parse(extractedUserData['expirationDate']);
     if (!expirationDate.isAfter(DateTime.now())) {
-      print('returning false 1');
       return false;
     }
     _token = extractedUserData['token'];
@@ -97,7 +95,6 @@ class AuthProvider with ChangeNotifier {
     _expirationDate = expirationDate;
     notifyListeners();
     _autoLogout();
-    print('returning true');
     return true;
   }
 
