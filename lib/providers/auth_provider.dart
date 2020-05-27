@@ -101,12 +101,15 @@ class AuthProvider with ChangeNotifier {
     return true;
   }
 
-  void logout() {
+  void logout() async {
     _token = null;
     _userId = null;
     _expirationDate = null;
     if (_authTimer != null) _authTimer.cancel();
     notifyListeners();
+    final preferences = await SharedPreferences.getInstance();
+    preferences.clear();
+    //preferences.remove('userData') if you add anything else to Shared Preferences
   }
 
   void _autoLogout() {
