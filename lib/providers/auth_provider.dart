@@ -87,14 +87,14 @@ class AuthProvider with ChangeNotifier {
     }
     final extractedUserData =
         json.decode(preferences.getString('userData')) as Map<String, dynamic>;
-    final expirationDate = extractedUserData['expirationDate'];
-    if (expirationDate.isAfter(DateTime.now())) {
+    final expirationDate = DateTime.parse(extractedUserData['expirationDate']);
+    if (!expirationDate.isAfter(DateTime.now())) {
       print('returning false 1');
       return false;
     }
     _token = extractedUserData['token'];
     _userId = extractedUserData['userId'];
-    _expirationDate = extractedUserData['expirationDate'];
+    _expirationDate = expirationDate;
     notifyListeners();
     _autoLogout();
     print('returning true');
